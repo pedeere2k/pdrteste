@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Coração com Partículas</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const particles = [];
+const heartPoints = [];
+
+function heartFunction(t) {
+  // fórmula paramétrica do coração
+  const x = 16 * Math.pow(Math.sin(t), 3);
+  const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+  return {x, y};
+}
+
+// gerar pontos do coração
+for (let t = 0; t < Math.PI*2; t += 0.1) {
+  const {x, y} = heartFunction(t);
+  heartPoints.push({
+    x: canvas.width/2 + x*20,
+    y: canvas.height/2 + y*20
+  });
+}
+
+// criar partículas
+for (let i = 0; i < 200; i++) {
+  const target = heartPoints[Math.floor(Math.random()*heartPoints.length)];
+  particles.push({
+    x: Math.random()*canvas.width,
+    y: canvas.height + Math.random()*200,
+    targetX: target.x,
+    targetY: target.y,
+    speed: 0.02 + Math.random()*0.02
+  });
+}
+
+function animate() {
+  ctx.fillStyle = "rgba(0,0,0,0.2)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  for (let p of particles) {
+    p.x += (p.targetX - p.x) * p.speed;
+    p.y += (p.targetY - p.y) * p.speed;
+
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
