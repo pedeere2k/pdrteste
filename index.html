@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Coração com Partículas</title>
+  <title>Anac fede a coco</title>
   <style>
     body {
       margin: 0;
@@ -26,17 +26,19 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const particles = [];
+const heartParticles = [];
 const heartPoints = [];
+const nameParticles = [];
+const namePoints = [];
 
+// Função do coração
 function heartFunction(t) {
-  // fórmula paramétrica do coração
   const x = 16 * Math.pow(Math.sin(t), 3);
   const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
   return {x, y};
 }
 
-// gerar pontos do coração
+// Pontos do coração
 for (let t = 0; t < Math.PI*2; t += 0.1) {
   const {x, y} = heartFunction(t);
   heartPoints.push({
@@ -45,31 +47,68 @@ for (let t = 0; t < Math.PI*2; t += 0.1) {
   });
 }
 
-// criar partículas
+// Partículas do coração
 for (let i = 0; i < 200; i++) {
   const target = heartPoints[Math.floor(Math.random()*heartPoints.length)];
-  particles.push({
+  heartParticles.push({
     x: Math.random()*canvas.width,
     y: canvas.height + Math.random()*200,
     targetX: target.x,
     targetY: target.y,
-    speed: 0.02 + Math.random()*0.02
+    speed: 0.02 + Math.random()*0.02,
+    color: "red"
   });
 }
 
+// Desenhar o nome "ANAC" em pixels invisíveis
+ctx.font = "bold 120px Arial";
+ctx.fillStyle = "white";
+ctx.textAlign = "center";
+ctx.fillText("ANAC", canvas.width/2, canvas.height/2 - 150);
+
+// Capturar pixels do texto
+const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+for (let y = 0; y < canvas.height; y += 6) {
+  for (let x = 0; x < canvas.width; x += 6) {
+    const index = (y*canvas.width + x) * 4;
+    if (imageData.data[index+3] > 128) {
+      namePoints.push({x, y});
+    }
+  }
+}
+
+// Criar partículas do nome
+for (let i = 0; i < 300; i++) {
+  const target = namePoints[Math.floor(Math.random()*namePoints.length)];
+  nameParticles.push({
+    x: Math.random()*canvas.width,
+    y: -Math.random()*200,
+    targetX: target.x,
+    targetY: target.y,
+    speed: 0.02 + Math.random()*0.02,
+    color: "violet"
+  });
+}
+
+// Animação
 function animate() {
   ctx.fillStyle = "rgba(0,0,0,0.2)";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  for (let p of particles) {
-    p.x += (p.targetX - p.x) * p.speed;
-    p.y += (p.targetY - p.y) * p.speed;
+  function drawParticles(list) {
+    for (let p of list) {
+      p.x += (p.targetX - p.x) * p.speed;
+      p.y += (p.targetY - p.y) * p.speed;
 
-    ctx.fillStyle = "red";
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
-    ctx.fill();
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+      ctx.fill();
+    }
   }
+
+  drawParticles(heartParticles);
+  drawParticles(nameParticles);
 
   requestAnimationFrame(animate);
 }
